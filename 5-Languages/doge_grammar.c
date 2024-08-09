@@ -25,7 +25,9 @@ void add_history(char *unised) {}
 /* If not Windows, include the editline headers */
 #else
 #include <editline/readline.h>
+#ifndef __APPLE__
 #include <editline/history.h>
+#endif
 #endif
 
 int main(int argc, char** argv)

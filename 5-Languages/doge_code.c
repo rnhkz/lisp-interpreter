@@ -25,58 +25,15 @@ void add_history(char *unised) {}
 /* If not Windows, include the editline headers */
 #else
 #include <editline/readline.h>
+#ifndef __APPLE__
 #include <editline/history.h>
 #endif
-
-int number_of_nodes(mpc_ast_t* t)
-{
-	if (t->children_num == 0) { return 1; }
-	if (t->children_num >= 1) {
-		int total = 1;
-		for (int i = 0; i < t->children_num; i++) {
-			total = total + number_of_nodes(t->children[i]);
-		}
-		return total;
-	}
-	return 0;
-}
-
-/* Use operator string to see which operation to perform */
-long eval_op(long x, char* op, long y)
-{
-   if (strcmp(op, "+") == 0) { return x + y; }
-   if (strcmp(op, "-") == 0) { return x - y; }
-   if (strcmp(op, "*") == 0) { return x * y; }
-   if (strcmp(op, "/") == 0) { return x / y; }
-   return 0;
-}
-
-
-long eval (mpc_ast_t* t)
-{
-	/* If tagged as number return it directly */
-	if (strstr(t->tag, "number")) {
-		return atoi(t->contents);
-	}
-	
-	/* The operator is always second child */
-	char* op = t->children[1]->contents;
-	
-	/* We store the third child in 'x' */
-	long x = eval(t->children[2]);
-
-	int i = 3;
-	while (strstr(t->children[i]->tag, "expr")) {
-		x = eval_op(x, op, eval(t->children[i]));
-		i++;
-	}
-	return x;
-}
+#endif
 
 int main(int argc, char** argv)
 {
 	/* Create Some Parsers */
-	mpc_parser_t* Adjetive = mpc_or(4,
+	mpc_parser_t* Adjective = mpc_or(4,
 		mpc_sym("wow"), mpc_sym("many"),
 		mpc_sym("so"), mpc_sym("such")
 	);
@@ -88,21 +45,10 @@ int main(int argc, char** argv)
    );	
 
 	mpc_parser_t* Phrase = mpc_and(2, mpcf_strfold,
-		Adjetive, Noun, free);
+		Adjective, Noun, free);
 
 	mpc_parser_t* Doge = mpc_many(mpcf_strfold, Phrase);
 
-	/* Define them with the following Language */
-//	mpca_lang(MPCA_LANG_DEFAULT,
-//		"															\
-//			adjetive	: \"wow\" | \"many\"					\
-//						|  \"so\" | \"such\";				\
-//			noun		: \"lisp\" | \"language\"			\
-/						| \"book\" | \"build\" | \"c\";	\
-/			phrase	: <adjetive> <noun>;					\
-/			doge		: <phrase>*;							\
-		",
-//		Adjetive, Noun, Phrase, Doge);
 
 	puts("Lispy Version 0.0.0.0.3");
 	puts("Press Ctrl+c to Exit\n");
@@ -114,9 +60,9 @@ int main(int argc, char** argv)
 		mpc_result_t r;
 
 		if (mpc_parse("<stdin>", input, Doge, &r)) {		
-			long result = eval(r.output);
-			printf("%li\n", result);
-			mpc_ast_delete(r.output);
+			/* On Success Print the AST */
+  			mpc_ast_print(r.output);
+  			mpc_ast_delete(r.output);
 		}		
 		else {
          /* Otherwise Print the Error */
@@ -126,6 +72,6 @@ int main(int argc, char** argv)
 	
 		free(input);
 	}
-	mpc_cleanup(4, Adjetive, Noun, Phrase, Doge);
+	mpc_cleanup(4, Adjective, Noun, Phrase, Doge);
 	return 0;
 }
