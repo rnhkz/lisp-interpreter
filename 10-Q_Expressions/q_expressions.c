@@ -235,17 +235,17 @@ lval* builtin_head(lval* a)
 {
 	/* Check error conditions */
     LASSERT(a, a->count == 1,
-        "Funcrion 'tail' passed too many arguments!");
+        "Function 'head' passed too many arguments!");
     LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
-        "Function 'tail' passed incorrect types!");
+        "Function 'head' passed incorrect types!");
     LASSERT(a, a->cell[0]->count != 0,
-        "Function 'tail' passed {}!");
+        "Function 'head' passed {}!");
 
 	/* Otherwise take the first argument */
 	lval* v = lval_take(a, 0);
 
 	/* Delete all elements that are not the first element and return */
-	while (v->count > 1) { lval_del(lval_pop(a, 1)); }
+	while (v->count > 1) { lval_del(lval_pop(v, 1)); }
 	return v;
 }
 
@@ -263,7 +263,7 @@ lval* builtin_tail(lval* a)
     lval* v = lval_take(a, 0);
 
 	/* Delete first element and return */
-    lval_del(lval_pop(a, 0));
+    lval_del(lval_pop(v, 0));
     return v;
 }
 
@@ -291,7 +291,7 @@ lval* lval_join(lval* x, lval* y)
 {
 	/* For each cell in y add it to x */
 	while (y->count) {
-		lval_add(x, lval_pop(y, 0));
+		x = lval_add(x, lval_pop(y, 0));
 	}
 
 	/* Delete the empty y and return x */
