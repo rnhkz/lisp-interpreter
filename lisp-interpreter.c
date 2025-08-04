@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../mpc.h"
+#include "mpc.h"
 
 /* If the program is being ran in Windows, compile these functions */
 #ifdef _WIN32
